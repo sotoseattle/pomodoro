@@ -1,5 +1,5 @@
 defmodule PomoServer do
-  @name :pomo
+  @name :pomo_server
 
   use GenServer
 
@@ -13,13 +13,13 @@ defmodule PomoServer do
 
   # Client Interface
 
-  def start do
-    GenServer.start(__MODULE__, State.new(), name: @name)
+  def start_link(_arg) do
+    IO.puts "Starting the Pomodoro server"
+    GenServer.start_link(__MODULE__, State.new(), name: @name)
   end
 
   def new, do: GenServer.cast(@name, :new)
   def pauseplay, do: GenServer.cast(@name, :pauseplay)
-  def stop, do: GenServer.cast(@name, :stop)
 
   # Server Callbacks
 
@@ -42,11 +42,6 @@ defmodule PomoServer do
     log "... pausing countdown ..."
     cancel_msg(timer)
     {:noreply, %State{ state | ticking: nil }}
-  end
-
-  def handle_cast(:stop, state) do
-    cancel_msg(state.ticking)
-    {:noreply, State.new()}
   end
 
   def handle_info(:tock, %State{ remaining: 0} = state) do
